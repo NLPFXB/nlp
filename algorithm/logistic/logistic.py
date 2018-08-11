@@ -58,5 +58,4 @@ def plotBestFit(weights):
     plt.xlabel('X1'); plt.ylabel('X2');
     plt.show()
 
-ones()
 plotBestFit(None)
