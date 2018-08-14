@@ -16,6 +16,7 @@
 """
 import numpy as np
 import algorithm.util.file as file
+import os
 
 
 def isUpdate(w, x, b, y):
@@ -27,7 +28,7 @@ def isUpdate(w, x, b, y):
     :return: 判断是否更新
     """
     x = np.array(x)
-    if y * (np.dot(w,x) + b) <= 0:
+    if y * (np.dot(w, x) + b) <= 0:
         return True
     return False
 
@@ -39,18 +40,22 @@ def pre_process_data(data):
     :return:
     """
     # iris
-    # data = data[:100]
-    # data = [line.strip().split(',') for line in data]
-    data = [line.strip().split('	') for line in data]
+    data = data[:100]
+    data = [line.strip().split(',') for line in data]
+
+    # testSet.txt
+    # data = [line.strip().split('	') for line in data]
     for i in range(len(data)):
-        if data[i][-1] == '0':
+        # iris.txt
+        if data[i][-1] == 'Iris-setosa':
             data[i][-1] = '-1.0'
         else:
             data[i][-1] = '1.0'
-        # if data[i][-1] == 'Iris-setosa':
-        #     data[i][-1] = '-1.0'
-        # else:
-        #     data[i][-1] = '1.0'
+            # if data[i][-1] == '0':
+            #     data[i][-1] = '-1.0'
+            # else:
+            #     data[i][-1] = '1.0'
+
     for i in range(len(data)):
         for j in range(len(data[i])):
             if '-' in data[i][j]:
@@ -58,7 +63,7 @@ def pre_process_data(data):
             else:
                 data[i][j] = float(data[i][j])
     data_arr = np.array(data)
-    print(data_arr)
+    # print(data_arr)
     return data_arr
 
 
@@ -103,14 +108,14 @@ def update_params_by_data(params, dataSet):
     w = params.get('w')
     b = params.get('b')
     n = params.get('n')
-    i=0
+    i = 0
     while i < len(dataSet):
         for line in dataSet:
             if isUpdate(w, line[:-1], b, line[-1]):
                 w = w + n * (np.array(line[:-1]).T) * line[-1]
                 b = b + n * line[-1]
-                i=0
-                print(w,b)
+                i = 0
+                print(w, b)
             else:
                 i += 1
 
@@ -123,13 +128,16 @@ def predict(w, x, b):
     return -1
 
 
-# path = 'D:/github/nlp/algorithm/data/iris.data'
-path = 'D:/github/nlp/algorithm/data/testSet.txt'
+path = os.path.abspath(os.path.join(os.getcwd(), "..")) + '/data/iris.data'
+# path = 'D:/github/nlp/algorithm/data/testSet.txt'
 data = file.readlines(path)
 w, b = train_model(data)
-print(w,b)
-print(predict(w,np.array([0.317029,14.739025]),b) )
+# print(w,b)
+if predict(w, np.array([4.9, 3.1, 1.5, 0.1]), b) == 1:
+    print('Iris-versicolor')
+else:
+    print('Iris-setosa')
 
 """
-经过测试，貌似testSet线性不可分，需要实现线性可分的代码
+经过测试，貌似testSet线性不可分，需要实现线性可分的数据
 """
