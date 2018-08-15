@@ -7,6 +7,7 @@ import numpy as np
 import algorithm.util.file as file
 import os
 
+test_data = [[3, 3, 1], [4, 3, 1], [1, 1, -1]]
 # 计算gram矩阵
 # print(np.outer([1, 2, 3], [4, 5, 6, 7]))
 # data_x = np.outer([1, 2, 3,4], [4, 5, 6, 7])
@@ -16,10 +17,14 @@ data = file.readlines(path)
 
 
 def train_model(data):
-    gram, labels,data_x = pre_process_data(data)
+    gram, labels, data_x = pre_process_data(data)
     a, b, n = init_params(data_x)
     a, b = update_params_by_data(a, b, n, gram, labels)  # 更新参数方法，可以替换
-    return a, b
+    w = np.zeros((1,len(data_x[0])))
+    for i in range(data_x.__len__()):
+        w += np.array([float(x) for x in data_x[i]])*float(labels[i])*a[i]
+    print(w)
+    return w,b
 
 
 def update_params_by_data(a, b, n, gram, labels):
@@ -30,7 +35,7 @@ def update_params_by_data(a, b, n, gram, labels):
     i = 0
     while i < len(labels):
         if isUpdate(a, b, i, gram, labels):
-            a = a + n
+            a[i] = a[i] + n
             b = b + n * labels[i]
             i = 0
         else:
@@ -47,11 +52,7 @@ def isUpdate(a, b, i, gram, labels):
     :param y: 分类标签
     :return: 判断是否更新
     """
-    print(type(a),a)
-    print(type(gram[:, i]),gram[:,i])
-    print(b)
-    print(np.dot(np.array(a)*labels, gram[:, i])+ b)
-    if (np.dot(np.array(a), gram[:, i]) + b) * labels[i] <= 0:
+    if (np.dot(np.array(a) * labels, gram[:, i]) + b) * labels[i] <= 0:
         return True
     return False
 
@@ -62,8 +63,7 @@ def init_params(data_x):
     :param data:
     :return:
     """
-    a = np.array(np.zeros(len(data_x[0])))
-    a = [float(x) for x in a]
+    a = np.array(np.zeros(len(data_x)))
     b = 0
     n = 0.1  # 学习速率
     return a, b, n
@@ -86,8 +86,8 @@ def pre_process_data(data):
             labels.append(-1)
         else:
             labels.append(1)
-    print(labels)
-    return gram, labels,data_x
+    # print(labels)
+    return gram, labels, data_x
 
 
 def compute_garms(data_X):
@@ -95,7 +95,8 @@ def compute_garms(data_X):
     :param data_X:  输入变量
     :return: 计算x
     """
-    len_n = len(data_X[0])
+
+    len_n = data_X.__len__()
     gram = np.ones((len_n, len_n))
     for i in range(len_n):
         for j in range(len_n):
@@ -103,17 +104,20 @@ def compute_garms(data_X):
     return gram
 
 
-def predict(w, x, b):
-    if np.dot(w, x) + b >= 0:
+def predict(w, x,b):
+    if np.dot(w,x)+b >= 0:
         return 1
     return -1
 
 
-a, b = train_model(data)
+# data = [line[:-1] for line in test_data]
+# print(compute_garms(data))
+w, b = train_model(data)
 # print(w,b)
-if predict(a, np.array([4.9, 3.1, 1.5, 0.1]), b) == 1:
+if predict(w, np.array([4.9, 3.1, 1.5, 0.1]), b) == 1:
     print('Iris-versicolor')
 else:
     print('Iris-setosa')
 
 # print(compute_garms(data_x))
+# a, b = train_model(test_data)
